@@ -7,8 +7,7 @@ canvas.height = window.innerHeight;
 var keys = [];
 
 var ship = {
-    img: 'assets/ship.png',
-    fireEl: document.getElementById('ship-thrust'),
+    img: 'ship',
     velX: 0,
     velY: 0,
     rot: 0,
@@ -18,6 +17,8 @@ var ship = {
     posX: canvas.width / 2,
     posY: canvas.height / 2,
     sprite: "",
+    thrustSprites: [1, 2, 3],
+    thrustFrame: 0,
     accel: function(vel) {
         this.velX += this.rotToX() * vel;
         this.velY += this.rotToY() * vel;
@@ -58,6 +59,19 @@ var ship = {
             player.velY -= player.velY * 0.01;
         }
 
+        if (this.posX < 0 - this.width) {
+            this.posX = canvas.width;
+        }
+        else if (this.posX > canvas.width) {
+            this.posX = 0 - this.width;
+        }
+        if (this.posY < 0 - this.height) {
+            this.posY = canvas.height;
+        }
+        else if (this.posY > canvas.height) {
+            this.posY = 0 - this.height;
+        }
+
         this.draw();
     },
     draw: function() {
@@ -65,7 +79,18 @@ var ship = {
         ctx.translate(this.posX + this.width / 2, this.posY + this.height / 2);
         ctx.rotate(this.rot + degreesToRads(90));
         ctx.translate(-this.width / 2, -this.height / 2);
-        ctx.drawImage(this.sprite, 0, 0, 32, 32);
+        if (this.isThrusting) {
+            ctx.drawImage(this.sprite, this.width * this.thrustSprites[this.spriteFrame], 0, 32, 32, 0, 0, 32, 32);
+            if (this.spriteFrame < this.thrustSprites.length - 1) {
+                this.spriteFrame++;
+            }
+            else {
+                this.spriteFrame = 0;
+            }
+        }
+        else {
+            ctx.drawImage(this.sprite, 0, 0, 32, 32, 0, 0, 32, 32);
+        }
         ctx.restore();
     },
     create: function(img, width, height, posX, posY) {
@@ -82,7 +107,7 @@ var ship = {
 
 }
 
-var player = ship.create('ship.png', 32, 32, canvas.width / 2, canvas.height / 2);
+var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 2, canvas.height / 2);
 
 
 
