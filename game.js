@@ -110,13 +110,19 @@ var ship = {
 var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 2, canvas.height / 2);
 
 
-
+var bg = new Image();
+bg.src = 'assets/bg.png';
+bg.onload = function() {
+    bg = ctx.createPattern(bg, 'repeat');
+    ctx.fillStyle = bg;
+}
 
 
 update();
 
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (keys[37]) {
         player.rot -= 0.05;
