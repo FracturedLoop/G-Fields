@@ -5,7 +5,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 var keys = [];
-var ships =[];
+var ships = [];
 var projectiles = [];
 var animationFrame = 0;
 
@@ -47,33 +47,20 @@ var ship = {
         image.src = this.img;
         this.sprite = image;
     },
+    readControls: function() {
+
+    },
     update: function () {
-        if (keys[37] || keys[65]) {
-            this.rot -= 0.05;
-        }
-        else if (keys[39] || keys[68]) {
-            this.rot += 0.05;
-        }
-        if (keys[38] || keys[87]) {
-            this.accel(0.1);
-            this.isThrusting = true;
-        }
-        else {
-            this.isThrusting = false;
-        }
-        if (keys[32] && new Date() - this.lastFired > 1000) {
-            this.lastFired = new Date();
-            laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
-        }
+        this.readControls();
 
         for (var bul of this.bullets) {
             bul.update();
         }
 
         for (var bul in projectiles) {
-            if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width && this.bullets.indexOf(projectiles[bul]) == -1) {
-                console.log('Destroying ' + this);
+            if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width / 2 && this != projectiles[bul].owner) {
                 ships.splice(ships.indexOf(this), 1);
+                projectiles[bul].destroy();
                 delete(this);
             }
         }
@@ -179,14 +166,14 @@ var laser = {
         image.src = this.img;
         this.sprite = image;
     },
-    setDate: function() {
+    setDate: function () {
         this.createDate = new Date();
     },
-    age: function() {
+    age: function () {
         return new Date() - this.createDate;
     },
     update: function () {
-        if (this.age() > 5000) {
+        if (this.age() > 2000) {
             this.destroy();
         }
         this.posX += this.velX;
@@ -207,12 +194,12 @@ var laser = {
 
         this.draw();
     },
-    destroy: function() {
+    destroy: function () {
         this.owner.bullets.splice(this.owner.bullets.indexOf(this), 1);
-        projectiles.splice(projectiles.indexOf(this));
+        projectiles.splice(projectiles.indexOf(this), 1);
         delete(this);
     },
-    draw: function() {
+    draw: function () {
         ctx.save();
         ctx.translate(this.posX + this.width / 2, this.posY + this.height / 2);
         ctx.rotate(this.rot + degreesToRads(90));
@@ -233,15 +220,61 @@ var laser = {
         newBullet.setSprite();
         newBullet.setDate();
         newBullet.owner = owner;
-        owner.bullets.push(newBullet);
+        newBullet.owner.bullets.push(newBullet);
+        console.log(owner);
         projectiles.push(newBullet);
         return newBullet;
     }
 }
 
-var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 2, canvas.height / 2);
+// create the player and the enemy
+var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 1.25, canvas.height / 1.25);
+var enemy = ship.create('ship-sprites.png', 32, 32, canvas.width / 4, canvas.width / 4);
 
+// specify controls for player
+player.readControls = function () {
+    if (keys[37]) {
+        this.rot -= 0.05;
+    }
+    else if (keys[39]) {
+        this.rot += 0.05;
+    }
+    if (keys[38]) {
+        this.accel(0.1);
+        this.isThrusting = true;
+    }
+    else {
+        this.isThrusting = false;
+    }
+    if (keys[40] && new Date() - this.lastFired > 1000) {
+        this.lastFired = new Date();
+        console.log(this.bullets);
+        laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
+    }
+}
 
+// specify controls for enemy
+enemy.readControls = function () {
+    if (keys[65]) {
+        this.rot -= 0.05;
+    }
+    else if (keys[68]) {
+        this.rot += 0.05;
+    }
+    if (keys[87]) {
+        this.accel(0.1);
+        this.isThrusting = true;
+    }
+    else {
+        this.isThrusting = false;
+    }
+    if (keys[83] && new Date() - this.lastFired > 1000) {
+        this.lastFired = new Date();
+        laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
+    }
+}
+
+// create the background pattern
 var bg = new Image();
 bg.src = 'assets/bg.png';
 bg.onload = function () {
@@ -256,11 +289,11 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
     for (ship of ships) {
         ship.update();
     }
 
+    // keep track of animation frames
     if (animationFrame >= 60) {
         animationFrame = 0;
     }
