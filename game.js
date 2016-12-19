@@ -5,6 +5,8 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 var keys = [];
+var ships =[];
+var projectiles = [];
 var animationFrame = 0;
 
 var ship = {
@@ -61,11 +63,19 @@ var ship = {
         }
         if (keys[32] && new Date() - this.lastFired > 1000) {
             this.lastFired = new Date();
-            laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 15, this);
+            laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
         }
 
-        for (bul of this.bullets) {
+        for (var bul of this.bullets) {
             bul.update();
+        }
+
+        for (var bul in projectiles) {
+            if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width && this.bullets.indexOf(projectiles[bul]) == -1) {
+                console.log('Destroying ' + this);
+                ships.splice(ships.indexOf(this), 1);
+                delete(this);
+            }
         }
 
         // debugging stop with k
@@ -133,6 +143,7 @@ var ship = {
         newShip.posX = posX;
         newShip.posY = posY;
         newShip.setSprite();
+        ships.push(newShip);
         return newShip;
     }
 
@@ -171,8 +182,11 @@ var laser = {
     setDate: function() {
         this.createDate = new Date();
     },
+    age: function() {
+        return new Date() - this.createDate;
+    },
     update: function () {
-        if (new Date() - this.createDate > 1000) {
+        if (this.age() > 5000) {
             this.destroy();
         }
         this.posX += this.velX;
@@ -195,6 +209,7 @@ var laser = {
     },
     destroy: function() {
         this.owner.bullets.splice(this.owner.bullets.indexOf(this), 1);
+        projectiles.splice(projectiles.indexOf(this));
         delete(this);
     },
     draw: function() {
@@ -219,6 +234,7 @@ var laser = {
         newBullet.setDate();
         newBullet.owner = owner;
         owner.bullets.push(newBullet);
+        projectiles.push(newBullet);
         return newBullet;
     }
 }
@@ -241,7 +257,9 @@ function update() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
-    player.update();
+    for (ship of ships) {
+        ship.update();
+    }
 
     if (animationFrame >= 60) {
         animationFrame = 0;
