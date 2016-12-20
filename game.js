@@ -21,9 +21,12 @@ var ship = {
     posY: canvas.height / 2,
     sprite: "",
     thrustSprites: [1, 2, 3],
+    breakSprites: [4, 5, 6, 7, 8],
+    breakFrame: 0,
     thrustFrame: 0,
     spriteFrame: 0,
     bullets: [],
+    isBroken: false,
     lastFired: new Date(),
     accel: function (vel) {
         this.velX += this.rotToX() * vel;
@@ -58,10 +61,9 @@ var ship = {
         }
 
         for (var bul in projectiles) {
-            if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width / 2 && this != projectiles[bul].owner) {
-                ships.splice(ships.indexOf(this), 1);
+            if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width && this != projectiles[bul].owner) {
                 projectiles[bul].destroy();
-                delete(this);
+                this.isBroken = true;
             }
         }
 
@@ -108,7 +110,19 @@ var ship = {
         ctx.translate(this.posX + this.width / 2, this.posY + this.height / 2);
         ctx.rotate(this.rot + degreesToRads(90));
         ctx.translate(-this.width / 2, -this.height / 2);
-        if (this.isThrusting) {
+        if (this.isBroken) {
+            if (this.breakFrame < this.breakSprites.length) {
+                ctx.drawImage(this.sprite, this.width * this.breakSprites[this.breakFrame], 0, 32, 32, 0, 0, 32, 32);
+            }
+            else {
+                ships.splice(ships.indexOf(this), 1);
+                delete(this);
+            }
+            if (animationFrame % 6 == 0) {
+                this.breakFrame += 1;
+            }
+        }
+        else if (this.isThrusting) {
             ctx.drawImage(this.sprite, this.width * this.thrustSprites[this.spriteFrame], 0, 32, 32, 0, 0, 32, 32);
             if (animationFrame % 6 == 0) {
                 this.spriteFrame += 1;
@@ -221,7 +235,6 @@ var laser = {
         newBullet.setDate();
         newBullet.owner = owner;
         newBullet.owner.bullets.push(newBullet);
-        console.log(owner);
         projectiles.push(newBullet);
         return newBullet;
     }
@@ -248,7 +261,6 @@ player.readControls = function () {
     }
     if (keys[40] && new Date() - this.lastFired > 1000) {
         this.lastFired = new Date();
-        console.log(this.bullets);
         laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
     }
 }
