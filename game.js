@@ -14,6 +14,8 @@ var ship = {
     velX: 0,
     velY: 0,
     rot: 0,
+    health: 3,
+    maxHealth: 3,
     width: 0,
     height: 0,
     isThrusting: false,
@@ -39,6 +41,10 @@ var ship = {
     rotToY: function () {
         return Math.sin(this.rot);
     },
+    fire: function() {
+        this.lastFired = new Date();
+        laser.create('laser-red.png', this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 10, this);
+    },
     drawFire: function () {
 
     },
@@ -50,19 +56,18 @@ var ship = {
         image.src = this.img;
         this.sprite = image;
     },
-    readControls: function() {
+    readControls: function () {
 
     },
     update: function () {
         this.readControls();
 
-        for (var bul of this.bullets) {
-            bul.update();
-        }
-
         for (var bul in projectiles) {
             if (Math.sqrt(Math.abs(Math.pow(this.posX + this.width / 2 - projectiles[bul].posX + projectiles[bul].width / 2, 2) + Math.pow(this.posY + this.height / 2 - projectiles[bul].posY + projectiles[bul].height / 2, 2))) < this.width && this != projectiles[bul].owner) {
                 projectiles[bul].destroy();
+                this.health -= 1;
+            }
+            if (this.health < 1) {
                 this.isBroken = true;
             }
         }
@@ -135,6 +140,14 @@ var ship = {
             ctx.drawImage(this.sprite, 0, 0, 32, 32, 0, 0, 32, 32);
         }
         ctx.restore();
+        ctx.save();
+        ctx.translate(this.posX, this.posY - this.height / 2);
+        ctx.fillStyle = '#d50000';
+        ctx.strokeStyle = '#d50000';
+        ctx.fillRect(0, 0, 32 * this.health / this.maxHealth, 4);
+        ctx.strokeRect(0, 0, 32, 4);
+        ctx.restore();
+
     },
     create: function (img, width, height, posX, posY) {
         var newShip = Object.create(this);
@@ -179,6 +192,8 @@ var laser = {
         var image = new Image();
         image.src = this.img;
         this.sprite = image;
+        this.width = image.width;
+        this.height = image.height;
     },
     setDate: function () {
         this.createDate = new Date();
@@ -215,18 +230,16 @@ var laser = {
     },
     draw: function () {
         ctx.save();
-        ctx.translate(this.posX + this.width / 2, this.posY + this.height / 2);
+        ctx.translate(this.posX, this.posY);
         ctx.rotate(this.rot + degreesToRads(90));
         ctx.translate(-this.width / 2, -this.height / 2);
         ctx.drawImage(this.sprite, 0, 0, this.width, this.height);
 
         ctx.restore();
     },
-    create: function (img, width, height, posX, posY, rot, vel, owner) {
+    create: function (img, posX, posY, rot, vel, owner) {
         var newBullet = Object.create(this);
         newBullet.img = 'assets/' + img;
-        newBullet.width = width;
-        newBullet.height = height;
         newBullet.posX = posX - newBullet.width / 2;
         newBullet.posY = posY - newBullet.height / 2;
         newBullet.rot = rot;
@@ -240,51 +253,62 @@ var laser = {
     }
 }
 
-// create the player and the enemy
-var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 1.25, canvas.height / 1.25);
-var enemy = ship.create('ship-sprites.png', 32, 32, canvas.width / 4, canvas.width / 4);
+function setup() {
+    keys = [];
+    ships = [];
+    projectiles = [];
+    animationFrame = 0;
 
-// specify controls for player
-player.readControls = function () {
-    if (keys[37]) {
-        this.rot -= 0.05;
+    // create the player and the enemy
+    var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 1.25, canvas.height / 1.25);
+    var enemy = ship.create('ship-sprites.png', 32, 32, canvas.width / 4, canvas.width / 4);
+
+    // specify controls for player
+    player.readControls = function () {
+        if (keys[37]) {
+            this.rot -= 0.05;
+        }
+        else if (keys[39]) {
+            this.rot += 0.05;
+        }
+        if (keys[38]) {
+            this.accel(0.1);
+            this.isThrusting = true;
+        }
+        else {
+            this.isThrusting = false;
+        }
+        if (keys[40] && new Date() - this.lastFired > 1000) {
+            this.fire();
+        }
     }
-    else if (keys[39]) {
-        this.rot += 0.05;
-    }
-    if (keys[38]) {
-        this.accel(0.1);
-        this.isThrusting = true;
-    }
-    else {
-        this.isThrusting = false;
-    }
-    if (keys[40] && new Date() - this.lastFired > 1000) {
-        this.lastFired = new Date();
-        laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
-    }
-}
 
 // specify controls for enemy
-enemy.readControls = function () {
-    if (keys[65]) {
-        this.rot -= 0.05;
+    enemy.readControls = function () {
+        if (keys[65]) {
+            this.rot -= 0.05;
+        }
+        else if (keys[68]) {
+            this.rot += 0.05;
+        }
+        if (keys[87]) {
+            this.accel(0.1);
+            this.isThrusting = true;
+        }
+        else {
+            this.isThrusting = false;
+        }
+        if (keys[83] && new Date() - this.lastFired > 1000) {
+            this.fire();
+        }
     }
-    else if (keys[68]) {
-        this.rot += 0.05;
-    }
-    if (keys[87]) {
-        this.accel(0.1);
-        this.isThrusting = true;
-    }
-    else {
-        this.isThrusting = false;
-    }
-    if (keys[83] && new Date() - this.lastFired > 1000) {
-        this.lastFired = new Date();
-        laser.create('laser-red.png', 4, 16, this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 5, this);
+
+    for (var shi of ships) {
+        shi.velX = 0, shi.velY = 0, shi.rot = 0;
+        shi.health = shi.maxHealth;
     }
 }
+
 
 // create the background pattern
 var bg = new Image();
@@ -294,15 +318,27 @@ bg.onload = function () {
     ctx.fillStyle = bg;
 }
 
-
+setup();
 update();
 
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // update the projectiles
+    for (var bul of projectiles) {
+        bul.update();
+    }
+
+    // update the ships
     for (ship of ships) {
         ship.update();
+    }
+
+    // listen for the reset button after there is only one ship remaining
+    if (ships.length < 2 && keys[32]) {
+        console.log('resetting...');
+        setup();
     }
 
     // keep track of animation frames
