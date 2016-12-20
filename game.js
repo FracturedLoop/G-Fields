@@ -352,3 +352,9 @@ window.addEventListener("keydown", function (event) {
 window.addEventListener("keyup", function (event) {
     delete keys[event.keyCode];
 }, true);
+
+window.addEventListener('resize', function (e) {
+    console.log('resized');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+})
