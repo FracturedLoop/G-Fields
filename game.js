@@ -260,8 +260,8 @@ function setup() {
     animationFrame = 0;
 
     // create the player and the enemy
-    var player = ship.create('ship-sprites.png', 32, 32, canvas.width / 1.25, canvas.height / 1.25);
-    var enemy = ship.create('ship-sprites.png', 32, 32, canvas.width / 4, canvas.width / 4);
+    var player = ship.create('ship-sprites.png', 32, 32, (canvas.width * 0.6) * Math.random() + 0.2 * canvas.width, (canvas.height * 0.6) * Math.random() + 0.2 * canvas.height);
+    var enemy = ship.create('ship-sprites.png', 32, 32, (canvas.width * 0.6) * Math.random() + 0.2 * canvas.width, (canvas.height * 0.6) * Math.random() + 0.2 * canvas.height);
 
     // specify controls for player
     player.readControls = function () {
@@ -304,18 +304,9 @@ function setup() {
     }
 
     for (var shi of ships) {
-        shi.velX = 0, shi.velY = 0, shi.rot = 0;
+        shi.velX = 0, shi.velY = 0, shi.rot = Math.random() * 2 * Math.PI;
         shi.health = shi.maxHealth;
     }
-}
-
-
-// create the background pattern
-var bg = new Image();
-bg.src = 'assets/bg.png';
-bg.onload = function () {
-    bg = ctx.createPattern(bg, 'repeat');
-    ctx.fillStyle = bg;
 }
 
 setup();
@@ -323,7 +314,6 @@ update();
 
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // update the projectiles
     for (var bul of projectiles) {
