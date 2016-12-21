@@ -1,6 +1,6 @@
+// set up the canvas
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -67,7 +67,7 @@ var ship = {
                 projectiles[bul].destroy();
                 this.health -= 1;
             }
-            if (this.health < 1) {
+            if (this.health == 0) {
                 this.isBroken = true;
             }
         }
