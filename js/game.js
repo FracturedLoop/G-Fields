@@ -10,6 +10,7 @@ var projectiles = [];
 var animationFrame = 0;
 
 function setup() {
+    appState = 'running';
     keys = [];
     ships = [];
     projectiles = [];
@@ -60,7 +61,9 @@ function setup() {
     };
 
     ships.forEach(function (shi) {
-        shi.velX = 0, shi.velY = 0, shi.rot = Math.random() * 2 * Math.PI;
+        shi.velX = 0;
+        shi.velY = 0;
+        shi.rot = Math.random() * 2 * Math.PI;
         shi.health = shi.maxHealth;
     });
 }

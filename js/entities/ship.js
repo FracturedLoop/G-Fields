@@ -12,7 +12,6 @@ var Ship = function (img, width, height, posX, posY) {
     this.posY = posY;
     this.sprite = "";
     this.thrustSprites = [1, 2, 3];
-    this.thrustSFX = 0;
     this.breakSprites = [4, 5, 6, 7, 8];
     this.breakFrame = 0;
     this.thrustFrame = 0;
@@ -134,6 +133,8 @@ Ship.prototype.render = function () {
         ctx.drawImage(this.sprite, 0, 0, 32, 32, 0, 0, 32, 32);
     }
     ctx.restore();
+
+    // draw the health bar
     ctx.save();
     ctx.translate(this.posX, this.posY - this.height / 2);
     ctx.fillStyle = '#d50000';
