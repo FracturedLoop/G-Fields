@@ -1,11 +1,7 @@
-// set up the canvas
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 var keys = [];
 var ships = [];
+var player;
+var env;
 var projectiles = [];
 var animationFrame = 0;
 
@@ -17,8 +13,10 @@ function setup() {
     animationFrame = 0;
 
     // create the player and the enemy
-    var player = new Ship('ship-sprites.png', 32, 32, (canvas.width * 0.6) * Math.random() + 0.2 * canvas.width, (canvas.height * 0.6) * Math.random() + 0.2 * canvas.height);
+    player = new Ship('ship-sprites.png', 32, 32, (canvas.width * 0.6) * Math.random() + 0.2 * canvas.width, (canvas.height * 0.6) * Math.random() + 0.2 * canvas.height);
     var enemy = new Ship('ship-sprites.png', 32, 32, (canvas.width * 0.6) * Math.random() + 0.2 * canvas.width, (canvas.height * 0.6) * Math.random() + 0.2 * canvas.height);
+    env = new Field('space-bg.png', []);
+    camera = new Camera(canvas.width, canvas.height, env.width - canvas.width, env.height - canvas.height);
 
     // specify controls for player
     player.readControls = function () {

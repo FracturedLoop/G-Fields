@@ -1,5 +1,8 @@
 var Ship = function (img, width, height, posX, posY) {
-    this.img = 'assets/' + img;
+
+    var image = new Image();
+    image.src = 'assets/' + img;
+    this.sprite = image;
     this.velY = 0;
     this.velX = 0;
     this.rot = 0;
@@ -10,7 +13,6 @@ var Ship = function (img, width, height, posX, posY) {
     this.isThrusting = false;
     this.posX = posX;
     this.posY = posY;
-    this.sprite = "";
     this.thrustSprites = [1, 2, 3];
     this.breakSprites = [4, 5, 6, 7, 8];
     this.breakFrame = 0;
@@ -21,7 +23,6 @@ var Ship = function (img, width, height, posX, posY) {
     this.lastFired = new Date();
 
     ships.push(this);
-    this.setSprite();
 };
 
 Ship.prototype.accel = function (vel) {
@@ -40,13 +41,7 @@ Ship.prototype.rotToY = function () {
 
 Ship.prototype.fire = function () {
     this.lastFired = new Date();
-    new Laser('laser-red.png', this.posX + this.width / 2, this.posY + this.height / 2, this.rot, 10, this);
-};
-
-Ship.prototype.setSprite = function () {
-    var image = new Image();
-    image.src = this.img;
-    this.sprite = image;
+    new Laser('laser-red.png', this.posX, this.posY, this.rot, 10, this);
 };
 
 Ship.prototype.readControls = function () {
@@ -89,23 +84,54 @@ Ship.prototype.update = function () {
         this.velY -= this.velY * 0.01;
     }
 
-    if (this.posX < 0 - this.width) {
-        this.posX = canvas.width;
+    if (this.posX < 0) {
+        this.posX = 0;
     }
-    else if (this.posX > canvas.width) {
-        this.posX = 0 - this.width;
+    else if (this.posX > env.width) {
+        this.posX = env.width;
     }
-    if (this.posY < 0 - this.height) {
-        this.posY = canvas.height;
+    if (this.posY < 0) {
+        this.posY = 0;
     }
-    else if (this.posY > canvas.height) {
-        this.posY = 0 - this.height;
+    else if (this.posY > env.height) {
+        this.posY = env.height;
     }
 };
 
 Ship.prototype.render = function () {
     ctx.save();
-    ctx.translate(this.posX + this.width / 2, this.posY + this.height / 2);
+    var tx;
+    var ty = camera.width / 2;
+    if (this === player) {
+        if (this.posX >= camera.width / 2 && this.posX <= camera.maxX + camera.width / 2) {
+            tx = camera.width / 2;
+        }
+        else if (this.posX < camera.width) {
+            tx = this.posX;
+        }
+        else {
+            tx = this.posX - camera.posX;
+        }
+
+        if (this.posY >= camera.height / 2 && this.posY <= camera.maxY + camera.height / 2) {
+            ty = camera.height / 2;
+        }
+        else if (this.posY < camera.height) {
+            ty = this.posY;
+        }
+        else {
+            ty = this.posY - camera.posY;
+        }
+
+
+
+        ctx.translate(tx, ty);
+    }
+    else {
+        tx = this.posX + this.width / 2 - camera.posX;
+        ty = this.posY + this.height / 2 - camera.posY;
+        ctx.translate(tx, ty);
+    }
     ctx.rotate(this.rot + degreesToRads(90));
     ctx.translate(-this.width / 2, -this.height / 2);
     if (this.isBroken) {
@@ -136,11 +162,10 @@ Ship.prototype.render = function () {
 
     // draw the health bar
     ctx.save();
-    ctx.translate(this.posX, this.posY - this.height / 2);
+    ctx.translate(tx - this.width / 2, ty - this.height);
     ctx.fillStyle = '#d50000';
     ctx.strokeStyle = '#d50000';
     ctx.fillRect(0, 0, 32 * this.health / this.maxHealth, 4);
     ctx.strokeRect(0, 0, 32, 4);
     ctx.restore();
-
 };

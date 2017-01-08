@@ -34,14 +34,6 @@ Laser.prototype.rotToY = function () {
     return Math.sin(this.rot);
 };
 
-Laser.prototype.setSprite = function (src) {
-    var image = new Image();
-    image.src = src;
-    this.sprite = image;
-    this.width = image.width;
-    this.height = image.height;
-};
-
 Laser.prototype.setDate = function () {
     this.createDate = new Date();
 };
@@ -58,15 +50,15 @@ Laser.prototype.update = function () {
     this.posY += this.velY;
 
     if (this.posX < 0 - this.width) {
-        this.posX = canvas.width;
+        this.posX = env.width / 2;
     }
-    else if (this.posX > canvas.width) {
+    else if (this.posX > env.width / 2) {
         this.posX = 0 - this.width;
     }
     if (this.posY < 0 - this.height) {
-        this.posY = canvas.height;
+        this.posY = env.height / 2;
     }
-    else if (this.posY > canvas.height) {
+    else if (this.posY > env.height / 2) {
         this.posY = 0 - this.height;
     }
 };
@@ -78,8 +70,11 @@ Laser.prototype.destroy = function () {
 };
 
 Laser.prototype.render = function () {
+    var tx, ty;
     ctx.save();
-    ctx.translate(this.posX, this.posY);
+    tx = this.posX + this.width / 2 - camera.posX - this.owner.width / 2;
+    ty = this.posY + this.height / 2 - camera.posY - this.owner.height / 2;
+    ctx.translate(tx, ty);
     ctx.rotate(this.rot + degreesToRads(90));
     ctx.translate(-this.width / 2, -this.height / 2);
     ctx.drawImage(this.sprite, 0, 0, this.width, this.height);
