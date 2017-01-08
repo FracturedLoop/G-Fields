@@ -10,18 +10,15 @@ var camera;
 
 Engine = (function (global) {
     var canvas = document.getElementById('canvas');
-    var bgCanvas = document.getElementById('bg-canvas');
     var ctx = canvas.getContext('2d');
-    var bctx = bgCanvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 400;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
 
 
 
     function main() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        bctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
 
         if (keys[27] && appState == 'running') {
             appState = 'paused';
@@ -36,6 +33,7 @@ Engine = (function (global) {
     function init() {
         appState = 'init';
         var mainMenuBtns = [new Button(15, 200, 200, 50, 'start', function() {
+            console.log('clicked');
             setup();
             appState = 'running';
         })];
@@ -94,8 +92,8 @@ Engine = (function (global) {
 
         switch (appState) {
             case 'running':
-                renderEntities();
                 renderBg();
+                renderEntities();
                 if (animationFrame < 60) {
                     animationFrame++;
                 }
@@ -129,8 +127,6 @@ Engine = (function (global) {
 
     global.canvas = canvas;
     global.ctx = ctx;
-    global.bgCanvas = bgCanvas;
-    global.bctx = bctx;
 
     canvas.addEventListener('mousemove', function(e) {
         mouse.posX = e.offsetX;

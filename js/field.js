@@ -16,7 +16,7 @@ Field.prototype.update = function update() {
 };
 
 Field.prototype.render = function() {
-    bctx.drawImage(this.bg, camera.posX, camera.posY, camera.width, camera.height, 0, 0, camera.width, camera.height);
+    ctx.drawImage(this.bg, camera.posX, camera.posY, camera.width, camera.height, 0, 0, camera.width, camera.height);
     this.features.forEach(function(feat) {
         feat.render();
     })

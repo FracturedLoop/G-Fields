@@ -48,19 +48,6 @@ Laser.prototype.update = function () {
     }
     this.posX += this.velX;
     this.posY += this.velY;
-
-    if (this.posX < 0 - this.width) {
-        this.posX = env.width / 2;
-    }
-    else if (this.posX > env.width / 2) {
-        this.posX = 0 - this.width;
-    }
-    if (this.posY < 0 - this.height) {
-        this.posY = env.height / 2;
-    }
-    else if (this.posY > env.height / 2) {
-        this.posY = 0 - this.height;
-    }
 };
 
 Laser.prototype.destroy = function () {
@@ -72,8 +59,15 @@ Laser.prototype.destroy = function () {
 Laser.prototype.render = function () {
     var tx, ty;
     ctx.save();
-    tx = this.posX + this.width / 2 - camera.posX - this.owner.width / 2;
-    ty = this.posY + this.height / 2 - camera.posY - this.owner.height / 2;
+    if (this.owner === player) {
+        tx = this.posX + this.width / 2 - camera.posX - this.owner.width / 2;
+        ty = this.posY + this.height / 2 - camera.posY - this.owner.height / 2;
+    }
+    else {
+        tx = this.posX + this.width / 2 - camera.posX;
+        ty = this.posY + this.height / 2 - camera.posY;
+    }
+
     ctx.translate(tx, ty);
     ctx.rotate(this.rot + degreesToRads(90));
     ctx.translate(-this.width / 2, -this.height / 2);
